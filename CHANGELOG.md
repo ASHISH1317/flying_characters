@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.2] - 2025-12-09
+### Added
+- Readme updated with new examples and usage instructions
+
 ## [0.0.1] - 2025-12-09
 ### Added
 - Initial release of FlyingCharacters widget
