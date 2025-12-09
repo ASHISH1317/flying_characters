@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.1] - 2025-12-09
+### Added
+- Character breaking issue fixed 
+
 ## [1.0.0] - 2025-12-09
 ### Added
 - Stable version
