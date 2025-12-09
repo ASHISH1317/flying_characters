@@ -29,7 +29,6 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
     text:
         "Flying Characters ✨ – A Flutter package for beautiful flying text animations",
   );
-  final key = GlobalKey();
 
   void refresh() {
     setState(() => seed++); // new seed triggers animation rebuild
@@ -37,35 +36,81 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
 
   @override
   Widget build(BuildContext context) {
+    // Define palette
+    const Color lightBlue = Color(0xFFD9EAFD);
+    const Color offWhite = Color(0xFFF8FAFC);
+    const Color blueGrey = Color(0xFFBCCCDC);
+    const Color darkGrey = Color(0xFF9AA6B2);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(brightness: Brightness.light, useMaterial3: true),
-      darkTheme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
-      themeMode: ThemeMode.system,
+      theme: ThemeData(
+        brightness: Brightness.light,
+        useMaterial3: true,
+        scaffoldBackgroundColor: offWhite,
+      ),
       home: Scaffold(
-        appBar: AppBar(title: const Text("Flying Characters Demo")),
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
+                SizedBox(height: 20),
+
                 /// 🔤 Editable text
-                TextField(
-                  controller: inputCtrl,
-                  decoration: const InputDecoration(
-                    labelText: "Enter text to animate",
-                    border: OutlineInputBorder(),
+                Container(
+                  decoration: BoxDecoration(
+                    color: offWhite,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: darkGrey.withValues(alpha: 0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
                   ),
-                  onChanged: (v) => setState(() => text = v),
+                  child: TextField(
+                    controller: inputCtrl,
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      labelText: "Enter text to animate",
+                      labelStyle: TextStyle(color: darkGrey),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: blueGrey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: lightBlue, width: 2),
+                      ),
+                      fillColor: offWhite,
+                      filled: true,
+                    ),
+                    onChanged: (v) => setState(() => text = v),
+                  ),
                 ),
                 const SizedBox(height: 20),
 
                 /// 🌟 Animation Widget Preview
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.withAlpha(80)),
+                    gradient: LinearGradient(
+                      colors: [lightBlue, blueGrey.withValues(alpha: 0.2)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: darkGrey.withValues(alpha: 0.15),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                    border: Border.all(color: blueGrey.withValues(alpha: 0.3)),
                   ),
                   child: FlyingCharacters(
                     key: ValueKey(seed),
@@ -76,10 +121,10 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                     randomDirections: random,
                     loop: loop,
                     mode: typeMode,
-                    // use selected type mode
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -88,25 +133,29 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
 
                 /// 🎛 Controls Panel
                 _slider(
-                  title: "Duration",
-                  value: duration.inMilliseconds.toDouble(),
-                  max: 2000,
-                  onChange: (v) => setState(
-                    () => duration = Duration(milliseconds: v.toInt()),
-                  ),
+                  "Duration",
+                  duration.inMilliseconds.toDouble(),
+                  2000,
+                  (v) => setState(() {
+                    duration = Duration(milliseconds: v.toInt());
+                  }),
+                  darkGrey,
                 ),
                 _slider(
-                  title: "Delay per Character",
-                  value: delay.inMilliseconds.toDouble(),
-                  max: 150,
-                  onChange: (v) =>
-                      setState(() => delay = Duration(milliseconds: v.toInt())),
+                  "Delay per Character",
+                  delay.inMilliseconds.toDouble(),
+                  150,
+                  (v) => setState(() {
+                    delay = Duration(milliseconds: v.toInt());
+                  }),
+                  darkGrey,
                 ),
                 _slider(
-                  title: "Start Offset (spread)",
-                  value: offset,
-                  max: 80,
-                  onChange: (v) => setState(() => offset = v),
+                  "Start Offset (spread)",
+                  offset,
+                  80,
+                  (v) => setState(() => offset = v),
+                  darkGrey,
                 ),
 
                 const SizedBox(height: 10),
@@ -116,11 +165,13 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                   children: [
                     Checkbox(
                       value: random,
+                      activeColor: darkGrey,
                       onChanged: (v) => setState(() => random = v!),
                     ),
                     const Text("Random directions"),
                     const Spacer(),
                     Checkbox(
+                      activeColor: darkGrey,
                       value: loop,
                       onChanged: (v) => setState(() => loop = v!),
                     ),
@@ -142,6 +193,7 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                           );
                         }
                       },
+                      activeColor: darkGrey,
                     ),
                     const Text("Character"),
                     const SizedBox(width: 20),
@@ -152,6 +204,7 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                           setState(() => typeMode = FlyingCharactersMode.word);
                         }
                       },
+                      activeColor: darkGrey,
                     ),
                     const Text("Word"),
                   ],
@@ -162,12 +215,31 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                 /// 🔁 Restart animation
                 ElevatedButton.icon(
                   onPressed: refresh,
-                  icon: const Icon(Icons.replay),
-                  label: const Text("Replay Animation"),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
+                    ),
+                    backgroundColor: lightBlue,
+                    foregroundColor: darkGrey,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    shadowColor: darkGrey.withValues(alpha: 0.25),
+                    elevation: 8,
+                  ),
+                  icon: const Icon(Icons.replay, color: Colors.black),
+                  label: const Text(
+                    "Replay Animation",
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
 
                 const SizedBox(height: 40),
-                const Text("Try modifying text, toggles & sliders ↓"),
+                Text(
+                  "Try modifying text, toggles & sliders ↓",
+                  style: TextStyle(color: darkGrey.withValues(alpha: 0.8)),
+                ),
               ],
             ),
           ),
@@ -177,21 +249,23 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
   }
 
   /// Reusable slider widget
-  Widget _slider({
-    required String title,
-    required double value,
-    required double max,
-    required ValueChanged<double> onChange,
-  }) {
+  Widget _slider(
+    String title,
+    double value,
+    double max,
+    ValueChanged<double> onChange,
+    Color color,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text("$title: ${value.toInt()}ms"),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         Slider(
           value: value,
           max: max,
           min: 0,
           divisions: 40,
+          activeColor: color,
           onChanged: onChange,
         ),
         const SizedBox(height: 10),
