@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.0] - 2025-12-09
+### Added
+- Stable version
+
 ## [0.0.4] - 2025-12-09
 ### Added
 - Readme updated with new examples and usage instructions
