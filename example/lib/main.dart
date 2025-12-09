@@ -13,15 +13,19 @@ class FlyingCharactersDemo extends StatefulWidget {
 }
 
 class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
-  String text = "Flying Characters ✨";
+  String text =
+      "Flying Characters ✨ – A Flutter package for beautiful flying text animations";
   Duration duration = const Duration(milliseconds: 700);
-  Duration delay = const Duration(milliseconds: 40);
+  Duration delay = const Duration(milliseconds: 50);
   double offset = 32;
   bool random = true;
   bool loop = false;
   int seed = 7;
 
-  final inputCtrl = TextEditingController(text: "Flying Characters ✨");
+  final inputCtrl = TextEditingController(
+    text:
+        "Flying Characters ✨ – A Flutter package for beautiful flying text animations",
+  );
   final key = GlobalKey();
 
   void refresh() {
@@ -42,7 +46,6 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-
                 /// 🔤 Editable text
                 TextField(
                   controller: inputCtrl,
@@ -59,7 +62,9 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: FlyingCharacters(
                     key: ValueKey(seed),
@@ -69,7 +74,10 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                     maxStartOffset: offset,
                     randomDirections: random,
                     loop: loop,
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
 
@@ -80,15 +88,16 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                   title: "Duration",
                   value: duration.inMilliseconds.toDouble(),
                   max: 2000,
-                  onChange: (v) => setState(() =>
-                  duration = Duration(milliseconds: v.toInt())),
+                  onChange: (v) => setState(
+                    () => duration = Duration(milliseconds: v.toInt()),
+                  ),
                 ),
                 _slider(
                   title: "Delay per Character",
                   value: delay.inMilliseconds.toDouble(),
                   max: 150,
-                  onChange: (v) => setState(() =>
-                  delay = Duration(milliseconds: v.toInt())),
+                  onChange: (v) =>
+                      setState(() => delay = Duration(milliseconds: v.toInt())),
                 ),
                 _slider(
                   title: "Start Offset (spread)",
@@ -143,12 +152,12 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         Text("$title: ${value.toInt()}ms"),
         Slider(
           value: value,
           max: max,
-          min: 50,
+          min: 0,
           divisions: 40,
           onChanged: onChange,
         ),

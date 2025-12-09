@@ -4,7 +4,26 @@ import 'package:flying_characters/src/text_utils.dart';
 import 'glyph_anim.dart';
 import 'token_model.dart';
 
+/// A widget that animates individual characters of a text with "flying" effects.
+///
+/// Each character can move from a random offset toward its final position,
+/// optionally looping or using random directions. You can configure timing,
+/// curves, text style, and per-character delays.
+///
+/// Example:
+/// ```dart
+/// FlyingCharacters(
+///   text: "Hello Flutter!",
+///   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+///   duration: Duration(milliseconds: 700),
+///   perItemDelay: Duration(milliseconds: 40),
+///   randomDirections: true,
+///   maxStartOffset: 32,
+///   loop: false,
+/// )
+/// ```
 class FlyingCharacters extends StatefulWidget {
+  /// Creates a [FlyingCharacters] widget.
   const FlyingCharacters({
     required this.text,
     super.key,
@@ -24,20 +43,49 @@ class FlyingCharacters extends StatefulWidget {
     this.randomSeed = 7,
   });
 
+  /// The text to animate.
   final String text;
+
+  /// Optional [TextStyle] for the text.
   final TextStyle? style;
+
+  /// Duration for each character animation.
   final Duration duration;
+
+  /// Delay between each character's animation start.
   final Duration perItemDelay;
+
+  /// Animation curve for each character's movement.
   final Curve curve;
+
+  /// Whether each character should move in random directions.
   final bool randomDirections;
+
+  /// Maximum starting offset for each character.
   final double maxStartOffset;
+
+  /// If true, the animation will loop back and forth continuously.
   final bool loop;
+
+  /// Optional delay before starting the animation.
   final Duration? startDelay;
+
+  /// Text alignment for the RichText.
   final TextAlign textAlign;
+
+  /// Optional text direction.
   final TextDirection? textDirection;
+
+  /// Optional text scale factor.
   final double? textScaleFactor;
+
+  /// Maximum number of lines for the text.
   final int? maxLines;
+
+  /// Overflow behavior for the text.
   final TextOverflow overflow;
+
+  /// Random seed for deterministic randomization.
   final int randomSeed;
 
   @override
@@ -53,14 +101,11 @@ class _FlyingCharactersState extends State<FlyingCharacters>
   @override
   void initState() {
     super.initState();
-
     _tokens = TextTokenizer.tokenize(widget.text);
-
     _controller = AnimationController(
       vsync: this,
       duration: widget.duration + _totalStagger(_animatedCount()),
     );
-
     _items = _buildAnimations();
 
     if (widget.startDelay != null) {
@@ -123,7 +168,6 @@ class _FlyingCharactersState extends State<FlyingCharacters>
   @override
   void didUpdateWidget(covariant FlyingCharacters oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     final bool needRebuild =
         oldWidget.text != widget.text ||
         oldWidget.duration != widget.duration ||
@@ -177,7 +221,9 @@ class _FlyingCharactersState extends State<FlyingCharacters>
                     child: Text(
                       anim.text,
                       style: style,
-                      textScaler: TextScaler.linear(widget.textScaleFactor ?? 1),
+                      textScaler: TextScaler.linear(
+                        widget.textScaleFactor ?? 1,
+                      ),
                     ),
                   ),
                 );
