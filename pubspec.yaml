@@ -4,6 +4,7 @@ version: 0.0.1
 homepage: https://github.com/ASHISH1317/flying_characters
 repository: https://github.com/ASHISH1317/flying_characters
 issue_tracker: https://github.com/ASHISH1317/flying_characters/issues
+license: MIT
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -19,11 +20,8 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
 flutter:
-# Uncomment only when you add assets or fonts
-# assets:
-#   - assets/
-
-# fonts:
-#   - family: CustomFont
-#     fonts:
-#       - asset: fonts/CustomFont-Regular.ttf
+  assets:
+    - assets/blur.gif
+    - assets/flip.gif
+    - assets/fly.gif
+    - assets/swirl_float.gif

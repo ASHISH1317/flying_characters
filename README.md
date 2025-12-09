@@ -10,6 +10,7 @@ Perfect for celebratory effects, message animations, reactions, and playful UI m
 - Animate characters, emojis, icons, or custom widgets
 - Randomized movement for natural flying effect
 - Configurable speed, size, duration & spread
+- Multiple animation types: `fly`, `fadeBlur`, `flip3d`, `swirlFloat`
 - Works on any widget using overlay or inside layout
 - Lightweight & easy to integrate
 
@@ -17,7 +18,7 @@ Perfect for celebratory effects, message animations, reactions, and playful UI m
 
 ## 📦 Installation
 
-Add the package to your pubspec.yaml:
+Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
