@@ -1,0 +1,29 @@
+name: flying_characters
+description: A flutter package to animate flying characters or particles on screen.
+version: 0.0.1
+homepage: https://github.com/your_username/flying_characters
+repository: https://github.com/your_username/flying_characters
+issue_tracker: https://github.com/your_username/flying_characters/issues
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.0.0"   # Updated to modern stable version
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+# Uncomment only when you add assets or fonts
+# assets:
+#   - assets/
+
+# fonts:
+#   - family: CustomFont
+#     fonts:
+#       - asset: fonts/CustomFont-Regular.ttf
