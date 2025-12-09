@@ -1,8 +1,8 @@
-````markdown
-# 🚀 Flying Characters
+---
 
-A lightweight Flutter package to create beautiful **flying character animations** (letters, emojis,
-particles, icons, etc.) floating across the screen.  
+## 🚀 Flying Characters
+
+A lightweight Flutter package to create beautiful **flying character animations** (letters, emojis, particles, icons, etc.) floating across the screen.
 Perfect for celebratory effects, message animations, reactions, and playful UI moments.
 
 ---
@@ -21,9 +21,7 @@ Perfect for celebratory effects, message animations, reactions, and playful UI m
 * Randomized movement for **natural flying effect**
 * Configurable **speed, size, duration & spread**
 * Multiple animation types: `fly`, `fadeBlur`, `flip3d`, `swirlFloat`
-* Choose **per-word or per-character animation**
-* Looping & random directions supported
-* Works on **any widget** inside layout
+* Works on **any widget** using overlay or inside layout
 * Lightweight & easy to integrate
 
 ---
@@ -35,7 +33,7 @@ Add the package to your `pubspec.yaml`:
 ```yaml
 dependencies:
   flying_characters: ^0.0.2
-````
+```
 
 Then run:
 
@@ -47,7 +45,7 @@ flutter pub get
 
 ## 📝 Example Usage
 
-### Basic Text Animation
+### Basic Flying Text
 
 ```dart
 import 'package:flutter/material.dart';
@@ -84,10 +82,11 @@ class MyApp extends StatelessWidget {
   }
 }
 ```
-
 ---
+
 ## ⚙️ License
 
 This package is licensed under the **MIT License**.
 See [LICENSE](https://github.com/ASHISH1317/flying_characters/blob/main/LICENSE) for details.
-```
+
+---
