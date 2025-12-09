@@ -1,5 +1,7 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flying_characters/src/flying_animation_type.dart';
 import 'package:flying_characters/src/flying_characters_mode.dart';
 import 'package:flying_characters/src/text_utils.dart';
 import 'glyph_anim.dart';
@@ -44,6 +46,7 @@ class FlyingCharacters extends StatefulWidget {
     this.overflow = TextOverflow.visible,
     this.randomSeed = 7,
     this.mode = FlyingCharactersMode.word,
+    this.animationType = FlyingAnimationType.fly,
   });
 
   /// The text to animate.
@@ -93,6 +96,9 @@ class FlyingCharacters extends StatefulWidget {
 
   /// Random seed for deterministic randomization.
   final int randomSeed;
+
+  /// Flying animation type
+  final FlyingAnimationType animationType;
 
   @override
   State<FlyingCharacters> createState() => _FlyingCharactersState();
@@ -233,21 +239,77 @@ class _FlyingCharactersState extends State<FlyingCharacters>
               animation: anim.animation,
               builder: (_, __) {
                 final t = anim.animation.value;
-                final offset = Offset.lerp(anim.initialOffset, Offset.zero, t)!;
 
-                return Opacity(
-                  opacity: t,
-                  child: Transform.translate(
-                    offset: offset,
-                    child: Text(
-                      anim.text,
-                      style: style,
-                      textScaler: TextScaler.linear(
-                        widget.textScaleFactor ?? 1,
+                switch (widget.animationType) {
+                  ///---------------------------------------------------------
+                  /// 1. Classic Fade & Blur 🟦
+                  ///---------------------------------------------------------
+                  case FlyingAnimationType.fadeBlur:
+                    final blur = (1 - t) * 6; // reduce blur over time
+                    return Opacity(
+                      opacity: t,
+                      child: ImageFiltered(
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: blur,
+                          sigmaY: blur,
+                        ),
+                        child: Transform.translate(
+                          offset: Offset(0, (1 - t) * 10),
+                          // slight upward float
+                          child: Text(anim.text, style: style),
+                        ),
                       ),
-                    ),
-                  ),
-                );
+                    );
+
+                  ///---------------------------------------------------------
+                  /// 2. 3D Flip Animation 🟥
+                  ///---------------------------------------------------------
+                  case FlyingAnimationType.flip3d:
+                    return Transform(
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.001)
+                        ..rotateY((1 - t) * 1.5) // flip effect
+                        ..rotateX((1 - t) * 0.3),
+                      alignment: Alignment.center,
+                      child: Opacity(
+                        opacity: t,
+                        child: Text(anim.text, style: style),
+                      ),
+                    );
+
+                  ///---------------------------------------------------------
+                  /// 3. Swirl & Float Animation 🟩
+                  ///---------------------------------------------------------
+                  case FlyingAnimationType.swirlFloat:
+                    final swirl = sin(t * pi) * 10;
+                    return Transform.translate(
+                      offset: Offset(swirl, (1 - t) * -30), // float upward
+                      child: Transform.rotate(
+                        angle: (1 - t) * pi / 2, // swirl rotation
+                        child: Opacity(
+                          opacity: t,
+                          child: Text(anim.text, style: style),
+                        ),
+                      ),
+                    );
+
+                  ///---------------------------------------------------------
+                  /// Default – Your Original Flying Offset Animation
+                  ///---------------------------------------------------------
+                  default:
+                    final offset = Offset.lerp(
+                      anim.initialOffset,
+                      Offset.zero,
+                      t,
+                    )!;
+                    return Opacity(
+                      opacity: t,
+                      child: Transform.translate(
+                        offset: offset,
+                        child: Text(anim.text, style: style),
+                      ),
+                    );
+                }
               },
             ),
           );
