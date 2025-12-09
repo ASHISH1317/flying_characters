@@ -1,19 +1,21 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flying_characters/src/flying_characters_mode.dart';
 import 'package:flying_characters/src/text_utils.dart';
 import 'glyph_anim.dart';
 import 'token_model.dart';
 
-/// A widget that animates individual characters of a text with "flying" effects.
+/// A widget that animates text with "flying" effects.
 ///
-/// Each character can move from a random offset toward its final position,
-/// optionally looping or using random directions. You can configure timing,
-/// curves, text style, and per-character delays.
+/// Each token (word or character, based on [mode]) can move from a random
+/// offset toward its final position, optionally looping or using random directions.
+/// You can configure timing, curves, text style, per-token delays, and more.
 ///
 /// Example:
 /// ```dart
 /// FlyingCharacters(
 ///   text: "Hello Flutter!",
+///   mode: FlyingCharactersMode.character,
 ///   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
 ///   duration: Duration(milliseconds: 700),
 ///   perItemDelay: Duration(milliseconds: 40),
@@ -41,27 +43,31 @@ class FlyingCharacters extends StatefulWidget {
     this.maxLines,
     this.overflow = TextOverflow.visible,
     this.randomSeed = 7,
+    this.mode = FlyingCharactersMode.word,
   });
 
   /// The text to animate.
   final String text;
 
+  /// Animation granularity: word-level or character-level.
+  final FlyingCharactersMode mode;
+
   /// Optional [TextStyle] for the text.
   final TextStyle? style;
 
-  /// Duration for each character animation.
+  /// Duration for each token animation.
   final Duration duration;
 
-  /// Delay between each character's animation start.
+  /// Delay between each token's animation start.
   final Duration perItemDelay;
 
-  /// Animation curve for each character's movement.
+  /// Animation curve for each token's movement.
   final Curve curve;
 
-  /// Whether each character should move in random directions.
+  /// Whether each token should move in random directions.
   final bool randomDirections;
 
-  /// Maximum starting offset for each character.
+  /// Maximum starting offset for each token.
   final double maxStartOffset;
 
   /// If true, the animation will loop back and forth continuously.
@@ -101,7 +107,8 @@ class _FlyingCharactersState extends State<FlyingCharacters>
   @override
   void initState() {
     super.initState();
-    _tokens = TextTokenizer.tokenize(widget.text);
+
+    _tokens = _tokenizeText(widget.text, widget.mode);
     _controller = AnimationController(
       vsync: this,
       duration: widget.duration + _totalStagger(_animatedCount()),
@@ -119,6 +126,19 @@ class _FlyingCharactersState extends State<FlyingCharacters>
         if (status == AnimationStatus.completed) _controller.reverse();
         if (status == AnimationStatus.dismissed) _controller.forward();
       });
+    }
+  }
+
+  /// Tokenizes text based on [mode].
+  List<Token> _tokenizeText(String text, FlyingCharactersMode mode) {
+    switch (mode) {
+      case FlyingCharactersMode.character:
+        // Every character is animated
+        return text.characters
+            .map((c) => Token(text: c, animate: c.trim().isNotEmpty))
+            .toList();
+      case FlyingCharactersMode.word:
+        return TextTokenizer.tokenize(text);
     }
   }
 
@@ -172,10 +192,11 @@ class _FlyingCharactersState extends State<FlyingCharacters>
         oldWidget.text != widget.text ||
         oldWidget.duration != widget.duration ||
         oldWidget.randomSeed != widget.randomSeed ||
-        oldWidget.maxStartOffset != widget.maxStartOffset;
+        oldWidget.maxStartOffset != widget.maxStartOffset ||
+        oldWidget.mode != widget.mode;
 
     if (needRebuild) {
-      _tokens = TextTokenizer.tokenize(widget.text);
+      _tokens = _tokenizeText(widget.text, widget.mode);
       _controller.duration = widget.duration + _totalStagger(_animatedCount());
       _items = _buildAnimations();
       _start();

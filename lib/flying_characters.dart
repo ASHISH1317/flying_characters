@@ -19,3 +19,6 @@ library;
 
 /// Exposes the main [FlyingCharacters] widget for animating text.
 export 'src/flying_characters_widget.dart';
+
+/// Exposes the [FlyingCharactersMode] enum for word/character animation modes.
+export 'src/flying_characters_mode.dart';

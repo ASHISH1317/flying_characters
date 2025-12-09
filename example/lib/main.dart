@@ -74,6 +74,7 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                     maxStartOffset: offset,
                     randomDirections: random,
                     loop: loop,
+                    mode: FlyingCharactersMode.word,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
