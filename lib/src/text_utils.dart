@@ -39,7 +39,7 @@ class TextTokenizer {
 
         for (final char in characters) {
           // Matches word characters (letters, digits, accented letters).
-          final isWord = RegExp(r'[A-Za-z0-9\u00C0-\u017F]').hasMatch(char);
+          final isWord = !RegExp(r'\s').hasMatch(char);
 
           if (isWord) {
             if (!insideWord && buffer.isNotEmpty) {
