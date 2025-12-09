@@ -32,7 +32,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flying_characters: ^0.0.1
+  flying_characters: ^0.0.2
 ```
 
 Then run:
