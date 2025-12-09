@@ -22,6 +22,9 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
   bool loop = false;
   int seed = 7;
 
+  // Type mode state
+  FlyingCharactersMode typeMode = FlyingCharactersMode.word;
+
   final inputCtrl = TextEditingController(
     text:
         "Flying Characters ✨ – A Flutter package for beautiful flying text animations",
@@ -62,9 +65,7 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.grey.withValues(alpha: 0.3),
-                    ),
+                    border: Border.all(color: Colors.grey.withAlpha(80)),
                   ),
                   child: FlyingCharacters(
                     key: ValueKey(seed),
@@ -74,7 +75,8 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                     maxStartOffset: offset,
                     randomDirections: random,
                     loop: loop,
-                    mode: FlyingCharactersMode.word,
+                    mode: typeMode,
+                    // use selected type mode
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -107,6 +109,9 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                   onChange: (v) => setState(() => offset = v),
                 ),
 
+                const SizedBox(height: 10),
+
+                /// ✅ Random & Loop checkboxes
                 Row(
                   children: [
                     Checkbox(
@@ -114,14 +119,41 @@ class _FlyingCharactersDemoState extends State<FlyingCharactersDemo> {
                       onChanged: (v) => setState(() => random = v!),
                     ),
                     const Text("Random directions"),
-
                     const Spacer(),
-
                     Checkbox(
                       value: loop,
                       onChanged: (v) => setState(() => loop = v!),
                     ),
                     const Text("Loop"),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                /// 🔤 Type Mode checkboxes (Character / Word)
+                Row(
+                  children: [
+                    Checkbox(
+                      value: typeMode == FlyingCharactersMode.character,
+                      onChanged: (v) {
+                        if (v == true) {
+                          setState(
+                            () => typeMode = FlyingCharactersMode.character,
+                          );
+                        }
+                      },
+                    ),
+                    const Text("Character"),
+                    const SizedBox(width: 20),
+                    Checkbox(
+                      value: typeMode == FlyingCharactersMode.word,
+                      onChanged: (v) {
+                        if (v == true) {
+                          setState(() => typeMode = FlyingCharactersMode.word);
+                        }
+                      },
+                    ),
+                    const Text("Word"),
                   ],
                 ),
 
