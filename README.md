@@ -1,8 +1,8 @@
----
+````markdown
+# 🚀 Flying Characters
 
-## 🚀 Flying Characters
-
-A lightweight Flutter package to create beautiful **flying character animations** (letters, emojis, particles, icons, etc.) floating across the screen.
+A lightweight Flutter package to create beautiful **flying character animations** (letters, emojis,
+particles, icons, etc.) floating across the screen.  
 Perfect for celebratory effects, message animations, reactions, and playful UI moments.
 
 ---
@@ -21,7 +21,9 @@ Perfect for celebratory effects, message animations, reactions, and playful UI m
 * Randomized movement for **natural flying effect**
 * Configurable **speed, size, duration & spread**
 * Multiple animation types: `fly`, `fadeBlur`, `flip3d`, `swirlFloat`
-* Works on **any widget** using overlay or inside layout
+* Choose **per-word or per-character animation**
+* Looping & random directions supported
+* Works on **any widget** inside layout
 * Lightweight & easy to integrate
 
 ---
@@ -33,7 +35,7 @@ Add the package to your `pubspec.yaml`:
 ```yaml
 dependencies:
   flying_characters: ^0.0.2
-```
+````
 
 Then run:
 
@@ -45,15 +47,13 @@ flutter pub get
 
 ## 📝 Example Usage
 
-### Basic Flying Text
+### Basic Text Animation
 
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flying_characters/flying_characters.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -62,18 +62,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Flying Characters Demo')),
+        appBar: AppBar(title: const Text("Flying Characters Demo")),
         body: Center(
-          child: ElevatedButton(
-            onPressed: () {
-              FlyingCharacters.show(
-                context,
-                text: "🎉 Congratulations!",
-                mode: FlyingCharactersMode.fly,
-                duration: const Duration(seconds: 3),
-              );
-            },
-            child: const Text("Celebrate!"),
+          child: FlyingCharacters(
+            text: "🎉 Celebrate Flutter!",
+            mode: FlyingCharactersMode.word,
+            duration: const Duration(seconds: 2),
+            animationType: FlyingAnimationType.fly,
+            perItemDelay: const Duration(milliseconds: 50),
+            maxStartOffset: 30,
+            randomDirections: true,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
         ),
       ),
@@ -82,22 +85,9 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-### Custom Widget Flying
-
-```dart
-FlyingCharacters.show(
-  context,
-  widget: Icon(Icons.star, size: 30, color: Colors.yellow),
-  mode: FlyingCharactersMode.fly,
-  duration: const Duration(seconds: 4),
-);
-```
-
 ---
-
 ## ⚙️ License
 
 This package is licensed under the **MIT License**.
 See [LICENSE](https://github.com/ASHISH1317/flying_characters/blob/main/LICENSE) for details.
-
----
+```
