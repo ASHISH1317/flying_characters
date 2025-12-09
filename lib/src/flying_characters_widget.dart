@@ -1,26 +1,31 @@
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flying_characters/src/animated_token_word.dart';
 import 'package:flying_characters/src/flying_animation_type.dart';
 import 'package:flying_characters/src/flying_characters_mode.dart';
 import 'package:flying_characters/src/text_utils.dart';
 import 'glyph_anim.dart';
 import 'token_model.dart';
 
-/// A widget that animates text with "flying" effects.
+/// A widget that animates text with "flying" effects while preserving
+/// normal word wrapping.
 ///
-/// Each token (word or character, based on [mode]) can move from a random
-/// offset toward its final position, optionally looping or using random directions.
-/// You can configure timing, curves, text style, per-token delays, and more.
+/// Key behavior:
+/// - Layout is always word-based: each word is a single inline unit,
+///   so Flutter will never break inside a word when wrapping.
+/// - Animation can be at word level or character level:
+///   - [FlyingCharactersMode.word]: whole words fly in as units.
+///   - [FlyingCharactersMode.character]: each character inside a word
+///     has its own animation, but the *word* stays unbroken.
 ///
 /// Example:
-/// ```dart
+/// ```
 /// FlyingCharacters(
-///   text: "Hello Flutter!",
+///   text: "Hello Flutter Animations!",
 ///   mode: FlyingCharactersMode.character,
-///   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-///   duration: Duration(milliseconds: 700),
-///   perItemDelay: Duration(milliseconds: 40),
+///   style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+///   duration: const Duration(milliseconds: 700),
+///   perItemDelay: const Duration(milliseconds: 40),
 ///   randomDirections: true,
 ///   maxStartOffset: 32,
 ///   loop: false,
@@ -29,8 +34,8 @@ import 'token_model.dart';
 class FlyingCharacters extends StatefulWidget {
   /// Creates a [FlyingCharacters] widget.
   const FlyingCharacters({
-    required this.text,
     super.key,
+    required this.text,
     this.style,
     this.duration = const Duration(milliseconds: 700),
     this.perItemDelay = const Duration(milliseconds: 40),
@@ -52,13 +57,15 @@ class FlyingCharacters extends StatefulWidget {
   /// The text to animate.
   final String text;
 
-  /// Animation granularity: word-level or character-level.
+  /// Animation granularity:
+  /// - [FlyingCharactersMode.word]: one animation per word.
+  /// - [FlyingCharactersMode.character]: one animation per character.
   final FlyingCharactersMode mode;
 
   /// Optional [TextStyle] for the text.
   final TextStyle? style;
 
-  /// Duration for each token animation.
+  /// Duration for each token (word/character) animation.
   final Duration duration;
 
   /// Delay between each token's animation start.
@@ -79,10 +86,10 @@ class FlyingCharacters extends StatefulWidget {
   /// Optional delay before starting the animation.
   final Duration? startDelay;
 
-  /// Text alignment for the RichText.
+  /// Text alignment for the underlying [RichText].
   final TextAlign textAlign;
 
-  /// Optional text direction.
+  /// Optional explicit text direction.
   final TextDirection? textDirection;
 
   /// Optional text scale factor.
@@ -97,7 +104,7 @@ class FlyingCharacters extends StatefulWidget {
   /// Random seed for deterministic randomization.
   final int randomSeed;
 
-  /// Flying animation type
+  /// Visual style for each glyph's animation.
   final FlyingAnimationType animationType;
 
   @override
@@ -107,18 +114,34 @@ class FlyingCharacters extends StatefulWidget {
 class _FlyingCharactersState extends State<FlyingCharacters>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+
+  /// Word + separator tokens used for layout.
+  ///
+  /// These are always word tokens, even in character mode, so that
+  /// wrapping decisions are made only between words, not inside them.
   late List<Token> _tokens;
+
+  /// All glyph-level animations (word or character).
+  ///
+  /// In word mode: one entry per animated word.
+  /// In character mode: one entry per animated character inside each word.
   late List<GlyphAnimation> _items;
 
   @override
   void initState() {
     super.initState();
 
-    _tokens = _tokenizeText(widget.text, widget.mode);
+    // Always tokenize as words for layout.
+    _tokens = TextTokenizer.tokenize(
+      widget.text,
+      mode: FlyingCharactersMode.word,
+    );
+
     _controller = AnimationController(
       vsync: this,
       duration: widget.duration + _totalStagger(_animatedCount()),
     );
+
     _items = _buildAnimations();
 
     if (widget.startDelay != null) {
@@ -135,39 +158,50 @@ class _FlyingCharactersState extends State<FlyingCharacters>
     }
   }
 
-  /// Tokenizes text based on [mode].
-  List<Token> _tokenizeText(String text, FlyingCharactersMode mode) {
-    switch (mode) {
-      case FlyingCharactersMode.character:
-        // Every character is animated
-        return text.characters
-            .map((c) => Token(text: c, animate: c.trim().isNotEmpty))
-            .toList();
-      case FlyingCharactersMode.word:
-        return TextTokenizer.tokenize(text);
-    }
-  }
-
+  /// Total stagger delay for [count] animated units.
   Duration _totalStagger(int count) =>
       count == 0 ? Duration.zero : widget.perItemDelay * (count - 1);
 
+  /// Number of word tokens that are marked as animatable.
   int _animatedCount() => _tokens.where((t) => t.animate).length;
 
   void _start() => _controller.forward(from: 0);
 
+  /// Builds all glyph animations, depending on [widget.mode].
+  ///
+  /// - In word mode: one [GlyphAnimation] per word.
+  /// - In character mode: one [GlyphAnimation] per character in each word.
   List<GlyphAnimation> _buildAnimations() {
     final random = Random(widget.randomSeed);
-    final animatedIndices = List<int>.generate(
-      _tokens.length,
-      (i) => i,
-    ).where((i) => _tokens[i].animate).toList();
+    final List<GlyphAnimation> result = [];
 
-    final total = animatedIndices.length;
-    final fullMs =
-        widget.duration.inMilliseconds +
+    // Build logical "units" to animate.
+    // Word mode: units = words.
+    // Character mode: units = characters inside words.
+    final List<({int tokenIndex, int charIndex, String text})> units = [];
+
+    for (int ti = 0; ti < _tokens.length; ti++) {
+      final token = _tokens[ti];
+      if (!token.animate) continue;
+
+      if (widget.mode == FlyingCharactersMode.word) {
+        units.add((tokenIndex: ti, charIndex: 0, text: token.text));
+      } else {
+        final chars = token.text.characters.toList();
+        for (int ci = 0; ci < chars.length; ci++) {
+          units.add((tokenIndex: ti, charIndex: ci, text: chars[ci]));
+        }
+      }
+    }
+
+    final total = units.length;
+    if (total == 0) return result;
+
+    final fullMs = widget.duration.inMilliseconds +
         widget.perItemDelay.inMilliseconds * (total - 1);
 
-    return List.generate(total, (index) {
+    for (int index = 0; index < total; index++) {
+      final unit = units[index];
       final startMs = index * widget.perItemDelay.inMilliseconds;
       final begin = startMs / fullMs;
       final end = (startMs + widget.duration.inMilliseconds) / fullMs;
@@ -180,29 +214,39 @@ class _FlyingCharactersState extends State<FlyingCharacters>
       final angle = random.nextDouble() * 2 * pi;
       final radius = random.nextDouble() * widget.maxStartOffset;
 
-      return GlyphAnimation(
-        text: _tokens[animatedIndices[index]].text,
-        tokenIndex: animatedIndices[index],
-        animation: anim,
-        initialOffset: widget.randomDirections
-            ? Offset(cos(angle) * radius, sin(angle) * radius)
-            : Offset(radius, radius),
+      final initialOffset = widget.randomDirections
+          ? Offset(cos(angle) * radius, sin(angle) * radius)
+          : Offset(radius, radius);
+
+      result.add(
+        GlyphAnimation(
+          text: unit.text,
+          tokenIndex: unit.tokenIndex,
+          charIndex: unit.charIndex,
+          animation: anim,
+          initialOffset: initialOffset,
+        ),
       );
-    });
+    }
+
+    return result;
   }
 
   @override
   void didUpdateWidget(covariant FlyingCharacters oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final bool needRebuild =
-        oldWidget.text != widget.text ||
+
+    final bool needRebuild = oldWidget.text != widget.text ||
         oldWidget.duration != widget.duration ||
         oldWidget.randomSeed != widget.randomSeed ||
         oldWidget.maxStartOffset != widget.maxStartOffset ||
         oldWidget.mode != widget.mode;
 
     if (needRebuild) {
-      _tokens = _tokenizeText(widget.text, widget.mode);
+      _tokens = TextTokenizer.tokenize(
+        widget.text,
+        mode: FlyingCharactersMode.word,
+      );
       _controller.duration = widget.duration + _totalStagger(_animatedCount());
       _items = _buildAnimations();
       _start();
@@ -217,103 +261,55 @@ class _FlyingCharactersState extends State<FlyingCharacters>
 
   @override
   Widget build(BuildContext context) {
-    final style = DefaultTextStyle.of(context).style.merge(widget.style);
-    final animMap = {for (var a in _items) a.tokenIndex: a};
+    final defaultStyle = DefaultTextStyle.of(context).style;
+    final style = defaultStyle.merge(widget.style);
+
+    // Group glyph animations by token index (word index).
+    final Map<int, List<GlyphAnimation>> byToken = {};
+    for (final ga in _items) {
+      byToken.putIfAbsent(ga.tokenIndex, () => []).add(ga);
+    }
+
+    // Ensure glyphs for each token are ordered by character index.
+    for (final list in byToken.values) {
+      list.sort((a, b) => a.charIndex.compareTo(b.charIndex));
+    }
 
     return RichText(
       maxLines: widget.maxLines,
       textAlign: widget.textAlign,
       overflow: widget.overflow,
+      textScaler: widget.textScaleFactor != null
+          ? TextScaler.linear(widget.textScaleFactor!)
+          : MediaQuery.textScalerOf(context),
       text: TextSpan(
         style: style.copyWith(fontSize: style.fontSize ?? 18),
-        children: _tokens.map((token) {
-          final anim = animMap[_tokens.indexOf(token)];
-          if (!token.animate || anim == null) {
-            return TextSpan(text: token.text);
-          }
+        children: List.generate(
+          _tokens.length,
+          (tokenIndex) {
+            final token = _tokens[tokenIndex];
+            final glyphs = byToken[tokenIndex];
 
-          return WidgetSpan(
-            baseline: TextBaseline.alphabetic,
-            alignment: PlaceholderAlignment.baseline,
-            child: AnimatedBuilder(
-              animation: anim.animation,
-              builder: (_, __) {
-                final t = anim.animation.value;
+            // Non-animated tokens (spaces, punctuation, etc.) are plain spans.
+            if (!token.animate || glyphs == null || glyphs.isEmpty) {
+              return TextSpan(text: token.text);
+            }
 
-                switch (widget.animationType) {
-                  ///---------------------------------------------------------
-                  /// 1. Classic Fade & Blur 🟦
-                  ///---------------------------------------------------------
-                  case FlyingAnimationType.fadeBlur:
-                    final blur = (1 - t) * 6; // reduce blur over time
-                    return Opacity(
-                      opacity: t,
-                      child: ImageFiltered(
-                        imageFilter: ImageFilter.blur(
-                          sigmaX: blur,
-                          sigmaY: blur,
-                        ),
-                        child: Transform.translate(
-                          offset: Offset(0, (1 - t) * 10),
-                          // slight upward float
-                          child: Text(anim.text, style: style),
-                        ),
-                      ),
-                    );
-
-                  ///---------------------------------------------------------
-                  /// 2. 3D Flip Animation 🟥
-                  ///---------------------------------------------------------
-                  case FlyingAnimationType.flip3d:
-                    return Transform(
-                      transform: Matrix4.identity()
-                        ..setEntry(3, 2, 0.001)
-                        ..rotateY((1 - t) * 1.5) // flip effect
-                        ..rotateX((1 - t) * 0.3),
-                      alignment: Alignment.center,
-                      child: Opacity(
-                        opacity: t,
-                        child: Text(anim.text, style: style),
-                      ),
-                    );
-
-                  ///---------------------------------------------------------
-                  /// 3. Swirl & Float Animation 🟩
-                  ///---------------------------------------------------------
-                  case FlyingAnimationType.swirlFloat:
-                    final swirl = sin(t * pi) * 10;
-                    return Transform.translate(
-                      offset: Offset(swirl, (1 - t) * -30), // float upward
-                      child: Transform.rotate(
-                        angle: (1 - t) * pi / 2, // swirl rotation
-                        child: Opacity(
-                          opacity: t,
-                          child: Text(anim.text, style: style),
-                        ),
-                      ),
-                    );
-
-                  ///---------------------------------------------------------
-                  /// Default – Your Original Flying Offset Animation
-                  ///---------------------------------------------------------
-                  default:
-                    final offset = Offset.lerp(
-                      anim.initialOffset,
-                      Offset.zero,
-                      t,
-                    )!;
-                    return Opacity(
-                      opacity: t,
-                      child: Transform.translate(
-                        offset: offset,
-                        child: Text(anim.text, style: style),
-                      ),
-                    );
-                }
-              },
-            ),
-          );
-        }).toList(),
+            // Animated token: wrap in a single WidgetSpan so the whole word is
+            // treated as one unbreakable layout unit by RichText.[web:13][web:38]
+            return WidgetSpan(
+              baseline: TextBaseline.alphabetic,
+              alignment: PlaceholderAlignment.baseline,
+              child: AnimatedTokenWord(
+                tokenText: token.text,
+                glyphs: glyphs,
+                style: style,
+                animationType: widget.animationType,
+                mode: widget.mode,
+              ),
+            );
+          },
+        ),
       ),
     );
   }

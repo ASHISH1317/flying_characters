@@ -1,4 +1,4 @@
-/// Represents a single piece of text (a token) for animation purposes.
+/// Represents a single piece of text (a token) for animation and layout.
 ///
 /// A token can either be a "word" (which will animate) or a non-word sequence
 /// such as spaces, punctuation, or symbols (which will not animate).
@@ -6,8 +6,7 @@ class Token {
   /// Creates a [Token] instance.
   ///
   /// [text] is the string content of the token.
-  /// [animate] indicates whether this token should be animated
-  /// in [FlyingCharacters].
+  /// [animate] indicates whether this token should be animated.
   Token({
     required this.text,
     required this.animate,
