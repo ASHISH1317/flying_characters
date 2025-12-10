@@ -9,9 +9,9 @@ Perfect for celebratory effects, message animations, reactions, and playful UI m
 
 ## 🎬 GIF Previews
 
-| Fly                                                                                        | FadeBlur                                                                                         | Flip3D                                                                                         | SwirlFloat                                                                                                |
-| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| ![Fly](https://raw.githubusercontent.com/ASHISH1317/flying_characters/main/assets/fly.gif) | ![FadeBlur](https://raw.githubusercontent.com/ASHISH1317/flying_characters/main/assets/blur.gif) | ![Flip3D](https://raw.githubusercontent.com/ASHISH1317/flying_characters/main/assets/flip.gif) | ![SwirlFloat](https://raw.githubusercontent.com/ASHISH1317/flying_characters/main/assets/swirl_float.gif) |
+| Words Fly                                                                                  | Character Fly                                                                                    |
+|--------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| ![Fly](https://raw.githubusercontent.com/ASHISH1317/flying_characters/main/assets/word_fly.gif) | ![FadeBlur](https://raw.githubusercontent.com/ASHISH1317/flying_characters/main/assets/character_fly.gif) |
 
 ---
 
@@ -32,7 +32,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flying_characters: ^1.0.2
+  flying_characters: ^1.0.3
 ```
 
 Then run:
