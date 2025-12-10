@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.4] - 2025-12-09
+### Update
+- Licence updated
+
 ## [1.0.3] - 2025-12-09
 ### Fixes
 - Bug fixes
